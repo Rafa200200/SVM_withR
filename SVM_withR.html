@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Rafael Lourenço" />
+
+<meta name="date" content="2024-01-09" />
+
+<title>AP4 - SVM Notebook</title>
+
+<script src="SVM_withR_files/header-attrs-2.25/header-attrs.js"></script>
+<script src="SVM_withR_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="SVM_withR_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="SVM_withR_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="SVM_withR_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="SVM_withR_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="SVM_withR_files/navigation-1.1/tabsets.js"></script>
+<link href="SVM_withR_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="SVM_withR_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">AP4 - SVM Notebook</h1>
+<h4 class="author">Rafael Lourenço</h4>
+<h4 class="date">2024-01-09</h4>
+
+</div>
+
+
+<div id="support-vector-machines-svm" class="section level1">
+<h1>Support Vector Machines (SVM)</h1>
+<div id="sources" class="section level2">
+<h2>Sources</h2>
+<ul>
+<li><a
+href="https://learndatascienceskill.com/index.php/2020/07/15/support-vector-machines-svms-with-r/">Support
+Vector Machines (SVMs) with R</a></li>
+<li><a href="https://rpubs.com/Ian_M/666939">Support Vector Machines in
+R</a></li>
+<li><a
+href="https://medium.com/0xcode/svm-classification-algorithms-in-r-ced0ee73821">SVM
+Classification Algorithms in R</a></li>
+</ul>
+<p>Support vector machines (SVM) are binary classifiers. For more than
+two (binary) classes, classification is achieved by running binary
+classification multiple times creatively.<br />
+The advantage of SVM is that they can perform non linear classification
+therefore making them more flexible, and classification is achieved
+using a hyperplane that separates the various classes.<br />
+SVMs can also be used for regression problems!</p>
+</div>
+<div id="dependencies" class="section level2">
+<h2>Dependencies</h2>
+<pre class="r"><code>#suppressMessages(install.packages(&quot;tidyverse&quot;)) #installs the packages
+suppressMessages(library(tidyverse)) #loads the installed package
+
+# Correlation Visualization
+#suppressMessages(install.packages(&quot;corrplot&quot;))
+suppressMessages(library(corrplot))
+
+# Train Test split util
+#suppressMessages(install.packages(&#39;caTools&#39;))
+suppressMessages(library(caTools))
+
+# SVM
+#suppressMessages(install.packages(&quot;e071&quot;))
+suppressMessages(library(e1071))</code></pre>
+</div>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>First we start by importing the dataset, a basic one: iris. We can
+use <strong>view()</strong> to check if dataset was correctly
+imported.<br />
+This dataset contains information about the Sepal and Petal Length and
+Width of 3 different iris species: Setosa, Versicolor, and Virginica</p>
+<pre class="r"><code>data(iris)
+
+#View the dataset, to ensure the data is loaded correctly
+view(iris)</code></pre>
+<pre class="r"><code>head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<pre class="r"><code>str(iris)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels &quot;setosa&quot;,&quot;versicolor&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+<div id="data-exploration" class="section level3">
+<h3>Data exploration</h3>
+<p><strong>summary()</strong> allows us to explore statistical data of
+each variable:</p>
+<pre class="r"><code>summary(iris)</code></pre>
+<pre><code>##   Sepal.Length    Sepal.Width     Petal.Length    Petal.Width   
+##  Min.   :4.300   Min.   :2.000   Min.   :1.000   Min.   :0.100  
+##  1st Qu.:5.100   1st Qu.:2.800   1st Qu.:1.600   1st Qu.:0.300  
+##  Median :5.800   Median :3.000   Median :4.350   Median :1.300  
+##  Mean   :5.843   Mean   :3.057   Mean   :3.758   Mean   :1.199  
+##  3rd Qu.:6.400   3rd Qu.:3.300   3rd Qu.:5.100   3rd Qu.:1.800  
+##  Max.   :7.900   Max.   :4.400   Max.   :6.900   Max.   :2.500  
+##        Species  
+##  setosa    :50  
+##  versicolor:50  
+##  virginica :50  
+##                 
+##                 
+## </code></pre>
+<div id="feature-correlation" class="section level4">
+<h4>Feature correlation</h4>
+<p>We will plot a correlation matrix to see how features interact with
+each other. In SVM we need features that can easily allow the creation
+of an hyperplane to separate them, so this will give us a general look
+to what features to choose.</p>
+<pre class="r"><code>num.cols &lt;- sapply(iris, is.numeric)
+cor.data &lt;- cor(iris[,num.cols])
+corrplot(cor.data, method=&#39;color&#39;, type=&#39;upper&#39;, tl.col=&#39;black&#39;, tl.srt=45)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="sepal-length-vs-sepal-width" class="section level4">
+<h4>Sepal Length vs Sepal Width</h4>
+<pre class="r"><code>plot(iris$Sepal.Length,iris$Sepal.Width,col=iris$Species) #scatter plot sepal width against sepal length
+legend(&quot;topright&quot;, legend=c(&quot;setosa&quot;, &quot;versicolor&quot;, &quot;virginica&quot;), col=c(&quot;black&quot;, &quot;red&quot;, &quot;green&quot;), pch=1, cex=0.8)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>The separation between <em>versicolor</em> and <em>virginica</em>
+does not look good. It means that SVMs will not be able to identify a
+good separation hyperplane later if we are going to use these two
+attributes as input variables. We would achieve low prediction
+accuracy.</p>
+</div>
+<div id="petal-length-vs-petal-width" class="section level4">
+<h4>Petal Length vs Petal Width</h4>
+<pre class="r"><code>plot(iris$Petal.Length,iris$Petal.Width,col=iris$Species)
+legend(&quot;topright&quot;, legend=c(&quot;setosa&quot;, &quot;versicolor&quot;, &quot;virginica&quot;), col=c(&quot;black&quot;, &quot;red&quot;, &quot;green&quot;), pch=1, cex=0.8)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>The separation between the 3 species is much better, so I’ll use
+<em>Petal Length</em> and <em>Petal Width</em> as input variables to the
+SVM model.</p>
+</div>
+</div>
+</div>
+<div id="classification" class="section level2">
+<h2>Classification</h2>
+<div id="train-test-split" class="section level3">
+<h3>Train Test Split</h3>
+<pre class="r"><code># Set random seed
+set.seed(123)
+
+# 2/3 Train/Test Split
+split = sample.split(iris$Species, SplitRatio = 2/3)
+
+train_split = subset(iris, split==TRUE)
+test_split = subset(iris, split==FALSE)</code></pre>
+<pre class="r"><code>summary(train_split)</code></pre>
+<pre><code>##   Sepal.Length    Sepal.Width     Petal.Length    Petal.Width   
+##  Min.   :4.300   Min.   :2.200   Min.   :1.000   Min.   :0.100  
+##  1st Qu.:5.100   1st Qu.:2.800   1st Qu.:1.600   1st Qu.:0.300  
+##  Median :5.800   Median :3.000   Median :4.300   Median :1.300  
+##  Mean   :5.842   Mean   :3.039   Mean   :3.756   Mean   :1.208  
+##  3rd Qu.:6.450   3rd Qu.:3.300   3rd Qu.:5.100   3rd Qu.:1.850  
+##  Max.   :7.700   Max.   :4.000   Max.   :6.900   Max.   :2.500  
+##        Species  
+##  setosa    :33  
+##  versicolor:33  
+##  virginica :33  
+##                 
+##                 
+## </code></pre>
+<pre class="r"><code>summary(test_split)</code></pre>
+<pre><code>##   Sepal.Length    Sepal.Width     Petal.Length    Petal.Width   
+##  Min.   :4.600   Min.   :2.000   Min.   :1.300   Min.   :0.100  
+##  1st Qu.:5.100   1st Qu.:2.800   1st Qu.:1.550   1st Qu.:0.350  
+##  Median :5.700   Median :3.000   Median :4.400   Median :1.300  
+##  Mean   :5.845   Mean   :3.092   Mean   :3.763   Mean   :1.182  
+##  3rd Qu.:6.300   3rd Qu.:3.400   3rd Qu.:5.100   3rd Qu.:1.800  
+##  Max.   :7.900   Max.   :4.400   Max.   :6.700   Max.   :2.500  
+##        Species  
+##  setosa    :17  
+##  versicolor:17  
+##  virginica :17  
+##                 
+##                 
+## </code></pre>
+<p>As we can see, we performed a stratified split, as the number of
+species per class is balanced, both in the training and test sets.</p>
+<p>Now we select only the features (<em>Petal Length</em> and <em>Petal
+Width</em>) that are going to be used for the model input:</p>
+<pre class="r"><code>input_variables &lt;- c(&quot;Petal.Length&quot;, &quot;Petal.Width&quot;, &quot;Species&quot;)
+train_set &lt;- train_split[input_variables]
+test_set &lt;- test_split[input_variables]</code></pre>
+</div>
+<div id="linear-svm" class="section level3">
+<h3>Linear SVM</h3>
+<p>For simplicity we will start by creating a Linear SVM.<br />
+The argument <strong>scale</strong> tells the SVM to scale each feature
+to have mean zero or standard deviation one. This should almost always
+be used since all kernel methods are based on distance.</p>
+<pre class="r"><code>svm_linear &lt;- svm(Species~.,
+                  data = train_set,
+                  type = &quot;C-classification&quot;,
+                  kernel = &quot;linear&quot;,
+                  scale = TRUE)
+
+summary(svm_linear)</code></pre>
+<pre><code>## 
+## Call:
+## svm(formula = Species ~ ., data = train_set, type = &quot;C-classification&quot;, 
+##     kernel = &quot;linear&quot;, scale = TRUE)
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  linear 
+##        cost:  1 
+## 
+## Number of Support Vectors:  22
+## 
+##  ( 2 11 9 )
+## 
+## 
+## Number of Classes:  3 
+## 
+## Levels: 
+##  setosa versicolor virginica</code></pre>
+<p>Then we can plot the trained SVM, and see the hyperplanes created to
+separate the 3 classes, based on the 2 features we selected:</p>
+<pre class="r"><code>plot(svm_linear, train_set, main=&quot;SVM Linear (Training Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<div id="prediction" class="section level4">
+<h4>Prediction</h4>
+<p>After creating and training the model on the train set, it is time to
+evaluate our model in the test set.</p>
+<pre class="r"><code>pred_svm_linear &lt;- predict(svm_linear, test_set)</code></pre>
+<p><strong>Confusion Matrix</strong></p>
+<p>We will start by checking the confusion matrix. We see that the model
+got 4 predictions wrong:</p>
+<pre class="r"><code>cm_svm_linear &lt;- table(pred_svm_linear, test_set$Species)
+cm_svm_linear</code></pre>
+<pre><code>##                
+## pred_svm_linear setosa versicolor virginica
+##      setosa         17          0         0
+##      versicolor      0         15         2
+##      virginica       0          2        15</code></pre>
+<p><strong>Accuracy</strong></p>
+<p>Then we calculate the accuracy for this model</p>
+<pre class="r"><code>acc_svm_linear &lt;- mean(pred_svm_linear==test_set$Species)
+acc_svm_linear</code></pre>
+<pre><code>## [1] 0.9215686</code></pre>
+<p>And finally we can plot the Linear SVM on with the test set
+points:</p>
+<pre class="r"><code>plot(svm_linear, test_set, main=&quot;SVM Linear (Test Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><strong>Conclusions<br />
+</strong>Even though we used the simplest SVM (Linear) it achieved a
+really good performance. This also comes from the fact that this is a
+simple dataset, and it does not contain many observations. Still we will
+explore more options and try to increase.</p>
+</div>
+</div>
+<div id="radial-svm" class="section level3">
+<h3>Radial SVM</h3>
+<p>The next kernel we are going to explore is the
+<strong>Radial</strong> one, as it is one of the most popular kernels
+used. This should enable a better separation than the linear one.</p>
+<pre class="r"><code>svm_radial &lt;- svm(Species~.,
+                  data = train_set,
+                  type = &quot;C-classification&quot;,
+                  kernel = &quot;radial&quot;,
+                  scale = TRUE)
+
+summary(svm_radial)</code></pre>
+<pre><code>## 
+## Call:
+## svm(formula = Species ~ ., data = train_set, type = &quot;C-classification&quot;, 
+##     kernel = &quot;radial&quot;, scale = TRUE)
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  radial 
+##        cost:  1 
+## 
+## Number of Support Vectors:  28
+## 
+##  ( 5 11 12 )
+## 
+## 
+## Number of Classes:  3 
+## 
+## Levels: 
+##  setosa versicolor virginica</code></pre>
+<pre class="r"><code>plot(svm_radial, train_set, main=&quot;SVM Radial (Training Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<div id="prediction-1" class="section level4">
+<h4>Prediction</h4>
+<pre class="r"><code>pred_svm_radial &lt;- predict(svm_radial, test_set)</code></pre>
+<pre class="r"><code>plot(svm_radial, test_set, main=&quot;SVM Radial (Test Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><strong>Confusion Matrix</strong></p>
+<pre class="r"><code>cm_svm_radial &lt;- table(pred_svm_radial, test_set$Species)
+cm_svm_radial</code></pre>
+<pre><code>##                
+## pred_svm_radial setosa versicolor virginica
+##      setosa         17          0         0
+##      versicolor      0         15         2
+##      virginica       0          2        15</code></pre>
+<p><strong>Accuracy</strong></p>
+<pre class="r"><code>acc_svm_radial &lt;- mean(pred_svm_radial==test_set$Species)
+acc_svm_radial</code></pre>
+<pre><code>## [1] 0.9215686</code></pre>
+<p>Even though the hyperplanes look completely different, the scores
+remained the same (once again, due to the simple dataset). Nevertheless,
+it gave us a brief look on the difference between the Linear and Radial
+Kernels.</p>
+</div>
+<div id="tuning-the-radial-svm" class="section level4">
+<h4>Tuning the Radial SVM</h4>
+<p>To further improve the models one can use the <strong>tune()</strong>
+function. Here we will try to improve the Radial SVM by tuning its
+parameters: Cost and Gamma. In the tuning process a 5 K-Fold is
+applied.</p>
+<pre class="r"><code>tune_svm_radial &lt;- tune.svm(Species~.,
+                          data = train_set,
+                          type = &quot;C-classification&quot;,
+                          kernel = &quot;radial&quot;,
+                          scale = TRUE,
+                          tunecontrol = tune.control(cross = 5),
+                          cost = c(0.01, 0.1, 1, 10),
+                          gamma = seq(0.1, 1, 0.1))
+
+summary(tune_svm_radial)</code></pre>
+<pre><code>## 
+## Parameter tuning of &#39;svm&#39;:
+## 
+## - sampling method: 5-fold cross validation 
+## 
+## - best parameters:
+##  gamma cost
+##    0.3  0.1
+## 
+## - best performance: 0.02 
+## 
+## - Detailed performance results:
+##    gamma  cost     error dispersion
+## 1    0.1  0.01 0.7078947 0.18721238
+## 2    0.2  0.01 0.7078947 0.18721238
+## 3    0.3  0.01 0.7078947 0.18721238
+## 4    0.4  0.01 0.7078947 0.18721238
+## 5    0.5  0.01 0.7078947 0.18721238
+## 6    0.6  0.01 0.7078947 0.18721238
+## 7    0.7  0.01 0.7078947 0.18721238
+## 8    0.8  0.01 0.7078947 0.18721238
+## 9    0.9  0.01 0.7078947 0.18721238
+## 10   1.0  0.01 0.7078947 0.18721238
+## 11   0.1  0.10 0.3647368 0.15549269
+## 12   0.2  0.10 0.1115789 0.06648579
+## 13   0.3  0.10 0.0200000 0.02738613
+## 14   0.4  0.10 0.0300000 0.04472136
+## 15   0.5  0.10 0.0300000 0.04472136
+## 16   0.6  0.10 0.0300000 0.04472136
+## 17   0.7  0.10 0.0300000 0.04472136
+## 18   0.8  0.10 0.0300000 0.04472136
+## 19   0.9  0.10 0.0300000 0.04472136
+## 20   1.0  0.10 0.0300000 0.04472136
+## 21   0.1  1.00 0.0300000 0.04472136
+## 22   0.2  1.00 0.0300000 0.04472136
+## 23   0.3  1.00 0.0300000 0.04472136
+## 24   0.4  1.00 0.0300000 0.04472136
+## 25   0.5  1.00 0.0300000 0.04472136
+## 26   0.6  1.00 0.0300000 0.04472136
+## 27   0.7  1.00 0.0300000 0.04472136
+## 28   0.8  1.00 0.0300000 0.04472136
+## 29   0.9  1.00 0.0300000 0.04472136
+## 30   1.0  1.00 0.0300000 0.04472136
+## 31   0.1 10.00 0.0300000 0.04472136
+## 32   0.2 10.00 0.0300000 0.04472136
+## 33   0.3 10.00 0.0200000 0.02738613
+## 34   0.4 10.00 0.0200000 0.02738613
+## 35   0.5 10.00 0.0200000 0.02738613
+## 36   0.6 10.00 0.0200000 0.02738613
+## 37   0.7 10.00 0.0200000 0.02738613
+## 38   0.8 10.00 0.0200000 0.02738613
+## 39   0.9 10.00 0.0200000 0.02738613
+## 40   1.0 10.00 0.0200000 0.02738613</code></pre>
+<p>Afterwards we proceed to use the best model obtained (with the
+smallest error) to predict on the test set and evaluate its
+performance</p>
+<pre class="r"><code>svm_radial_best &lt;- tune_svm_radial$best.model
+
+summary(svm_radial_best)</code></pre>
+<pre><code>## 
+## Call:
+## best.svm(x = Species ~ ., data = train_set, gamma = seq(0.1, 1, 0.1), 
+##     cost = c(0.01, 0.1, 1, 10), type = &quot;C-classification&quot;, kernel = &quot;radial&quot;, 
+##     scale = TRUE, tunecontrol = tune.control(cross = 5))
+## 
+## 
+## Parameters:
+##    SVM-Type:  C-classification 
+##  SVM-Kernel:  radial 
+##        cost:  0.1 
+## 
+## Number of Support Vectors:  83
+## 
+##  ( 19 33 31 )
+## 
+## 
+## Number of Classes:  3 
+## 
+## Levels: 
+##  setosa versicolor virginica</code></pre>
+<pre class="r"><code>plot(svm_radial_best, train_set, main=&quot;SVM Best Radial (Training Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<pre class="r"><code>pred_svm_radial_best &lt;- predict(svm_radial_best, test_set)</code></pre>
+<pre class="r"><code>cm_svm_radial_best &lt;- table(pred_svm_radial_best, test_set$Species)
+cm_svm_radial_best</code></pre>
+<pre><code>##                     
+## pred_svm_radial_best setosa versicolor virginica
+##           setosa         17          0         0
+##           versicolor      0         16         2
+##           virginica       0          1        15</code></pre>
+<pre class="r"><code>acc_svm_radial_best &lt;- mean(pred_svm_radial_best==test_set$Species)
+acc_svm_radial_best</code></pre>
+<pre><code>## [1] 0.9411765</code></pre>
+<pre class="r"><code>plot(svm_radial_best, test_set, main=&quot;SVM Best Radial (Test Set)&quot;)</code></pre>
+<p><img src="SVM_withR_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>With the new parameters, this Radial SVM made one less error which
+enables more accurate predictions!</p>
+</div>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This project showcased the application of Support Vector Machines
+(SVMs) for iris species classification in R. It explored data features,
+implemented both linear and radial SVMs, and fine-tuned the radial SVM
+for optimization. Despite the dataset’s simplicity, the models
+demonstrated strong performance, highlighting the effectiveness of SVMs
+in classification tasks.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

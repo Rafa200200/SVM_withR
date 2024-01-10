@@ -1,0 +1,283 @@
+---
+title: "AP4 - SVM Notebook"
+author: "Rafael Lourenço"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    self_contained: no
+---
+
+# Support Vector Machines (SVM)
+
+## Sources
+
+- [Support Vector Machines (SVMs) with R](https://learndatascienceskill.com/index.php/2020/07/15/support-vector-machines-svms-with-r/)
+- [Support Vector Machines in R](https://rpubs.com/Ian_M/666939)
+- [SVM Classification Algorithms in R](https://medium.com/0xcode/svm-classification-algorithms-in-r-ced0ee73821)
+
+
+Support vector machines (SVM) are binary classifiers. For more than two (binary) classes, classification is achieved by running binary classification multiple times creatively.\
+The advantage of SVM is that they can perform non linear classification therefore making them more flexible, and classification is achieved using a hyperplane that separates the various classes.\
+SVMs can also be used for regression problems!
+
+## Dependencies
+
+```{r message=FALSE, warning=FALSE}
+#suppressMessages(install.packages("tidyverse")) #installs the packages
+suppressMessages(library(tidyverse)) #loads the installed package
+
+# Correlation Visualization
+#suppressMessages(install.packages("corrplot"))
+suppressMessages(library(corrplot))
+
+# Train Test split util
+#suppressMessages(install.packages('caTools'))
+suppressMessages(library(caTools))
+
+# SVM
+#suppressMessages(install.packages("e071"))
+suppressMessages(library(e1071))
+```
+
+## Dataset
+
+First we start by importing the dataset, a basic one: iris. We can use **view()** to check if dataset was correctly imported.\
+This dataset contains information about the Sepal and Petal Length and Width of 3 different iris species: Setosa, Versicolor, and Virginica
+
+```{r}
+data(iris)
+
+#View the dataset, to ensure the data is loaded correctly
+view(iris)
+```
+
+```{r}
+head(iris)
+```
+
+```{r}
+str(iris)
+```
+
+### Data exploration
+
+**summary()** allows us to explore statistical data of each variable:
+
+```{r}
+summary(iris)
+```
+
+#### Feature correlation
+
+We will plot a correlation matrix to see how features interact with each other. In SVM we need features that can easily allow the creation of an hyperplane to separate them, so this will give us a general look to what features to choose.
+
+```{r}
+num.cols <- sapply(iris, is.numeric)
+cor.data <- cor(iris[,num.cols])
+corrplot(cor.data, method='color', type='upper', tl.col='black', tl.srt=45)
+```
+
+#### Sepal Length vs Sepal Width
+
+```{r}
+plot(iris$Sepal.Length,iris$Sepal.Width,col=iris$Species) #scatter plot sepal width against sepal length
+legend("topright", legend=c("setosa", "versicolor", "virginica"), col=c("black", "red", "green"), pch=1, cex=0.8)
+```
+
+The separation between *versicolor* and *virginica* does not look good. It means that SVMs will not be able to identify a good separation hyperplane later if we are going to use these two attributes as input variables. We would achieve low prediction accuracy.
+
+#### Petal Length vs Petal Width
+
+```{r}
+plot(iris$Petal.Length,iris$Petal.Width,col=iris$Species)
+legend("topright", legend=c("setosa", "versicolor", "virginica"), col=c("black", "red", "green"), pch=1, cex=0.8)
+```
+
+The separation between the 3 species is much better, so I'll use *Petal Length* and *Petal Width* as input variables to the SVM model.
+
+## Classification
+
+### Train Test Split
+
+```{r}
+# Set random seed
+set.seed(123)
+
+# 2/3 Train/Test Split
+split = sample.split(iris$Species, SplitRatio = 2/3)
+
+train_split = subset(iris, split==TRUE)
+test_split = subset(iris, split==FALSE)
+```
+
+```{r}
+summary(train_split)
+```
+
+```{r}
+summary(test_split)
+```
+
+As we can see, we performed a stratified split, as the number of species per class is balanced, both in the training and test sets.
+
+Now we select only the features (*Petal Length* and *Petal Width*) that are going to be used for the model input:
+
+```{r}
+input_variables <- c("Petal.Length", "Petal.Width", "Species")
+train_set <- train_split[input_variables]
+test_set <- test_split[input_variables]
+```
+
+### Linear SVM
+
+For simplicity we will start by creating a Linear SVM.\
+The argument **scale** tells the SVM to scale each feature to have mean zero or standard deviation one. This should almost always be used since all kernel methods are based on distance.
+
+```{r}
+svm_linear <- svm(Species~.,
+                  data = train_set,
+                  type = "C-classification",
+                  kernel = "linear",
+                  scale = TRUE)
+
+summary(svm_linear)
+```
+
+Then we can plot the trained SVM, and see the hyperplanes created to separate the 3 classes, based on the 2 features we selected:
+
+```{r}
+plot(svm_linear, train_set, main="SVM Linear (Training Set)")
+```
+
+#### Prediction
+
+After creating and training the model on the train set, it is time to evaluate our model in the test set.
+
+```{r}
+pred_svm_linear <- predict(svm_linear, test_set)
+```
+
+**Confusion Matrix**
+
+We will start by checking the confusion matrix. We see that the model got 4 predictions wrong:
+
+```{r}
+cm_svm_linear <- table(pred_svm_linear, test_set$Species)
+cm_svm_linear
+```
+
+**Accuracy**
+
+Then we calculate the accuracy for this model
+
+```{r}
+acc_svm_linear <- mean(pred_svm_linear==test_set$Species)
+acc_svm_linear
+```
+
+And finally we can plot the Linear SVM on with the test set points:
+
+```{r}
+plot(svm_linear, test_set, main="SVM Linear (Test Set)")
+```
+
+**Conclusions\
+**Even though we used the simplest SVM (Linear) it achieved a really good performance. This also comes from the fact that this is a simple dataset, and it does not contain many observations. Still we will explore more options and try to increase.
+
+### Radial SVM
+
+The next kernel we are going to explore is the **Radial** one, as it is one of the most popular kernels used. This should enable a better separation than the linear one.
+
+```{r}
+svm_radial <- svm(Species~.,
+                  data = train_set,
+                  type = "C-classification",
+                  kernel = "radial",
+                  scale = TRUE)
+
+summary(svm_radial)
+```
+
+```{r}
+plot(svm_radial, train_set, main="SVM Radial (Training Set)")
+```
+
+#### Prediction
+
+```{r}
+pred_svm_radial <- predict(svm_radial, test_set)
+```
+
+```{r}
+plot(svm_radial, test_set, main="SVM Radial (Test Set)")
+```
+
+**Confusion Matrix**
+
+```{r}
+cm_svm_radial <- table(pred_svm_radial, test_set$Species)
+cm_svm_radial
+```
+
+**Accuracy**
+
+```{r}
+acc_svm_radial <- mean(pred_svm_radial==test_set$Species)
+acc_svm_radial
+```
+
+Even though the hyperplanes look completely different, the scores remained the same (once again, due to the simple dataset). Nevertheless, it gave us a brief look on the difference between the Linear and Radial Kernels.
+
+#### Tuning the Radial SVM
+
+To further improve the models one can use the **tune()** function. Here we will try to improve the Radial SVM by tuning its parameters: Cost and Gamma. In the tuning process a 5 K-Fold is applied.
+
+```{r}
+tune_svm_radial <- tune.svm(Species~.,
+                          data = train_set,
+                          type = "C-classification",
+                          kernel = "radial",
+                          scale = TRUE,
+                          tunecontrol = tune.control(cross = 5),
+                          cost = c(0.01, 0.1, 1, 10),
+                          gamma = seq(0.1, 1, 0.1))
+
+summary(tune_svm_radial)
+```
+
+Afterwards we proceed to use the best model obtained (with the smallest error) to predict on the test set and evaluate its performance
+
+```{r}
+svm_radial_best <- tune_svm_radial$best.model
+
+summary(svm_radial_best)
+```
+
+```{r}
+plot(svm_radial_best, train_set, main="SVM Best Radial (Training Set)")
+```
+
+```{r}
+pred_svm_radial_best <- predict(svm_radial_best, test_set)
+```
+
+```{r}
+cm_svm_radial_best <- table(pred_svm_radial_best, test_set$Species)
+cm_svm_radial_best
+```
+
+```{r}
+acc_svm_radial_best <- mean(pred_svm_radial_best==test_set$Species)
+acc_svm_radial_best
+```
+
+```{r}
+plot(svm_radial_best, test_set, main="SVM Best Radial (Test Set)")
+```
+
+With the new parameters, this Radial SVM made one less error which enables more accurate predictions!
+
+## Conclusion
+
+This project showcased the application of Support Vector Machines (SVMs) for iris species classification in R. It explored data features, implemented both linear and radial SVMs, and fine-tuned the radial SVM for optimization. Despite the dataset's simplicity, the models demonstrated strong performance, highlighting the effectiveness of SVMs in classification tasks.
+
